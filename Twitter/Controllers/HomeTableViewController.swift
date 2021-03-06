@@ -36,6 +36,7 @@ class HomeTableViewController: UITableViewController {
         
         let user = tweetArr[indexPath.row]["user"] as! NSDictionary
         let content = tweetArr[indexPath.row]["text"] as! String
+        let time = tweetArr[indexPath.row]["created_at"] as! String
         
         let imageURL = URL(string: (user["profile_image_url_https"] as? String)!)
         let data = try? Data(contentsOf: imageURL!)
@@ -47,6 +48,16 @@ class HomeTableViewController: UITableViewController {
         cell.usernameLabel.text = user["name"] as? String
         cell.tweetContentLabel.text = content
         
+        let endOfTimeStr = time.firstIndex(of: "+")     
+        let formattedTime = String(time[...endOfTimeStr!].dropLast())
+        cell.tweetTimeLabel.text = formattedTime
+        
+        cell.setFav(tweetArr[indexPath.row]["favorited"] as! Bool)
+        cell.tweetId = tweetArr[indexPath.row]["id"] as! Int
+        cell.setRetweeted(tweetArr[indexPath.row]["retweeted"] as! Bool)
+
+        print(time)
+        
         return cell
     }
     
@@ -57,6 +68,9 @@ class HomeTableViewController: UITableViewController {
         myRefreshControl.addTarget(self, action: #selector(loadTweets), for: .valueChanged )
         tableView.refreshControl = myRefreshControl
         
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 176
+        
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -64,6 +78,13 @@ class HomeTableViewController: UITableViewController {
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.loadTweets()
+        
+    }
+    
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
